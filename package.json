@@ -36,6 +36,8 @@
     "openai": "^3.3.0",
     "pg": "^8.11.2",
     "puppeteer": "^21.0.0",
+    "rettiwt-api": "^2.0.1",
+    "rettiwt-auth": "^1.2.0",
     "sequelize": "^6.32.1",
     "sitemapper": "^3.2.6"
   },

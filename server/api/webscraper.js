@@ -4,6 +4,8 @@ const puppeteer = require('puppeteer')
 const cheerio = require('cheerio')
 const Sitemapper = require('sitemapper');
 const fs = require('fs')
+require("dotenv").config();
+const { Rettiwt } = require('rettiwt-api');
 const { models: CompanyData } = require('../db')
 const { Configuration, OpenAIApi } = require("openai");
 const { models: { User, Company, CompanyComparisonPoint, CompanyDataRaw } } = require('../db')
@@ -15,27 +17,28 @@ const configuration = new Configuration({
 
 const openai = new OpenAIApi(configuration);
 
+const rettiwt = new Rettiwt(process.env.TWITTER_API_KEY);
 
 
 const stripMetadataAndFormatting = (text) => {
     // Remove JSON and metadata-like structures
     text = text.replace(/\{[^}]*\}/g, '');
-  
+
     // Remove URLs
     text = text.replace(/http\S+|www\S+/g, '');
-  
+
     // Remove image URLs
     text = text.replace(/\burl\s*:\s*"(.*?)"/g, '');
-  
+
     // Remove HTML tags
     text = text.replace(/<.*?>/g, '');
 
     // Remove basic JavaScript lines
     text = text.replace(/if \(.*\)\s*{\s*.*\s*}\s*else.*/g, '');
-    
+
     // Remove URLs or File Paths
     text = text.replace(/http:\/\/[^\s]+|\.\w{2,4}/g, '');
-    
+
     // Remove JSON-like Metadata
     text = text.replace(/"\w+":\s*"[^"]*"/g, '');
 
@@ -44,42 +47,54 @@ const stripMetadataAndFormatting = (text) => {
 
     // Remove Twitter-Related Metadata
     text = text.replace(/twitter_.*:.*,/g, '');
-  
+
     // Remove extra spaces and line breaks
     text = text.replace(/\s+/g, ' ');
-  
+
     // Remove leading and trailing spaces
     text = text.trim();
-    
+
     return text;
 }
 
 
 
 
-  const cleanUpTextWithOpenAI = async (text) => {
+const cleanUpTextWithOpenAI = async (text) => {
 
     let input = text
     input = stripMetadataAndFormatting(text)
-    
+
 
     try {
-    const chatCompletion = await openai.createChatCompletion({
-        model: "gpt-3.5-turbo-16k",
-        max_tokens: 3500,
-        messages: [{role: "user", content: 'Strip out the unnecessary characters and reply with the full article and the publicationd ate and no other text. In exactly this format: {"article": article, "pubdate": mm/dd/yy}.    Article:' + input}],
-      });
-      return chatCompletion.data.choices[0].message.content;
+        const chatCompletion = await openai.createChatCompletion({
+            model: "gpt-3.5-turbo-16k",
+            max_tokens: 3500,
+            messages: [{ role: "user", content: 'Strip out the unnecessary characters and reply with the full article and the publicationd ate and no other text. In exactly this format: {"article": article, "pubdate": mm/dd/yy}.    Article:' + input }],
+        });
+        return chatCompletion.data.choices[0].message.content;
     } catch (err) {
         console.log(err.response.data.error.message)
     }
-      
+
 }
 
 
 
 const getTweets = (company) => {
-
+    /**
+     * Fetching the list of tweets that:
+     * 	- contain the words <word1> and <word2>
+     */
+    rettiwt.tweet.search({
+        words: ['google', 'twitter',],
+    }, 2)
+        .then(data => {
+            console.log(data);
+        })
+        .catch(err => {
+            console.log(err);
+        })
 
 }
 
@@ -93,103 +108,103 @@ const getG2Reviews = (company) => {
 
 const getArticles = async (company) => {
 
-try {
+    try {
 
-    //get articles from crunchbase. 
-    
-    //identify the crunchbase URL for the company
-    let result = await axios.get("https://www.google.com/search?q=" + company.url + " crunchbase")
-    let $ = cheerio.load(result.data)
-    let links = []
-    $("a").each((index, element) => {
-        links.push(element.attribs.href)
-    })
-    links = links.filter(link => link.includes("crunchbase.com"))
+        //get articles from crunchbase. 
 
-    let crunchbaseUrl = links[0].split('?q=')[1].split('&')[0] + "/signals_and_news/timeline"
-
-
-    //get the article links
-
-    links = []
-
-  
-    result = await axios.get(crunchbaseUrl,
-        {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                'Referer': 'https://www.google.com'
-        }
-    })
-  
-
-    $ = cheerio.load(result.data)
-
-    $(".activity-url-title").each((index, element) => {
-        links.push(element.attribs.href)
-    })
-    
-    //Upsert the articles into the company_data_raw table and then identify which articles we haven't scraped yet
-    let promises = links.map(async link => {
-        await CompanyDataRaw.upsert({
-            url: link,
-            type: 'article'
+        //identify the crunchbase URL for the company
+        let result = await axios.get("https://www.google.com/search?q=" + company.url + " crunchbase")
+        let $ = cheerio.load(result.data)
+        let links = []
+        $("a").each((index, element) => {
+            links.push(element.attribs.href)
         })
-    })
+        links = links.filter(link => link.includes("crunchbase.com"))
 
-    await Promise.all(promises)
+        let crunchbaseUrl = links[0].split('?q=')[1].split('&')[0] + "/signals_and_news/timeline"
 
-    let newLinks = await CompanyDataRaw.findAll({
-        where: {
-            type: 'article',
-            text: {
-                [Op.is]: null
-            }
-        }
-    })
 
-    newLinks = newLinks.map(link => link.url)
+        //get the article links
 
-    //now we can get the articles.
-    promises = newLinks.map(async link => {
-        //for each link, go to the page and grab the whole body and title and stick in DB
-    
-        let result = await axios.get(link,
+        links = []
+
+
+        result = await axios.get(crunchbaseUrl,
             {
                 headers: {
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
                     'Referer': 'https://www.google.com'
+                }
+            })
+
+
+        $ = cheerio.load(result.data)
+
+        $(".activity-url-title").each((index, element) => {
+            links.push(element.attribs.href)
+        })
+
+        //Upsert the articles into the company_data_raw table and then identify which articles we haven't scraped yet
+        let promises = links.map(async link => {
+            await CompanyDataRaw.upsert({
+                url: link,
+                type: 'article'
+            })
+        })
+
+        await Promise.all(promises)
+
+        let newLinks = await CompanyDataRaw.findAll({
+            where: {
+                type: 'article',
+                text: {
+                    [Op.is]: null
+                }
             }
         })
-        $ = cheerio.load(result.data)
-        let text = $("body").text()
 
-        //add a 2s delay
-        await new Promise(resolve => setTimeout(resolve, 2000))
+        newLinks = newLinks.map(link => link.url)
 
-        text = await cleanUpTextWithOpenAI(text)
+        //now we can get the articles.
+        promises = newLinks.map(async link => {
+            //for each link, go to the page and grab the whole body and title and stick in DB
 
-        console.log(text)
+            let result = await axios.get(link,
+                {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                        'Referer': 'https://www.google.com'
+                    }
+                })
+            $ = cheerio.load(result.data)
+            let text = $("body").text()
 
-        text = JSON.parse(text)
+            //add a 2s delay
+            await new Promise(resolve => setTimeout(resolve, 2000))
 
-        //insert into DB - NOTE - need to add company ID here 
-        await CompanyDataRaw.upsert({
-            url: link,
-            text: text.article,
-            date: new Date(text.pubdate),
-            type: 'article'
-        })        
-      
-    })
+            text = await cleanUpTextWithOpenAI(text)
 
-    await Promise.all(promises)
+            console.log(text)
 
-    return true
+            text = JSON.parse(text)
 
-} catch (err) {
-    console.log(err)
-}
+            //insert into DB - NOTE - need to add company ID here 
+            await CompanyDataRaw.upsert({
+                url: link,
+                text: text.article,
+                date: new Date(text.pubdate),
+                type: 'article'
+            })
+
+        })
+
+        await Promise.all(promises)
+
+        return true
+
+    } catch (err) {
+        console.log(err)
+    }
 
 
 }
@@ -202,12 +217,12 @@ let company = {
 
 const getContent = async (company) => {
 
-    try{
+    try {
 
         const sitemap = new Sitemapper();
         let pages
 
-        await sitemap.fetch(company.url+"sitemap.xml").then(function(sites) {
+        await sitemap.fetch(company.url + "sitemap.xml").then(function (sites) {
             pages = sites.sites
         });
 
@@ -215,12 +230,12 @@ const getContent = async (company) => {
 
         //do filtering
         pages = pages
-        .filter (page => !page.includes('blog'))
-        .filter(page => !page.includes('campaign'))
-        .filter(page => !page.includes('customer'))
-        .filter(page => !page.includes('webinar'))
-        .filter(page => !page.includes('error'))
-        .filter(page => (page.match(/\//g) || []).length <= 5)
+            .filter(page => !page.includes('blog'))
+            .filter(page => !page.includes('campaign'))
+            .filter(page => !page.includes('customer'))
+            .filter(page => !page.includes('webinar'))
+            .filter(page => !page.includes('error'))
+            .filter(page => (page.match(/\//g) || []).length <= 5)
 
 
         let promises = pages.map(async page => {
@@ -243,7 +258,7 @@ const getContent = async (company) => {
         })
 
         newPages = newPages.map(page => page.url)
-    
+
 
         // get all the content
         promises = newPages.map(async page => {
@@ -281,5 +296,5 @@ module.exports = {
     getG2Reviews,
     getArticles,
     getContent
-    
+
 }

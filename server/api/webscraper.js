@@ -373,7 +373,10 @@ const getContent = async (company) => {
             const page = newPages[i];
             
             try {
-                let result = await axios.get(page.url);
+                let result = await axios.get(page.url, {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                }});
                 let $ = cheerio.load(result.data);
                 $('script, style').remove();
                 let text = $("body").text();
@@ -389,7 +392,7 @@ const getContent = async (company) => {
                 });
         
                 //add a brief pause
-                await new Promise(resolve => setTimeout(resolve, 50));
+                await new Promise(resolve => setTimeout(resolve, 150));
             } catch (error) {
                 console.error(`Error fetching or processing URL: ${page.url}. Error: ${error.message}`);
             }
@@ -434,9 +437,6 @@ const getPPheaders = async () => {
     PPcookies.forEach(cookie => {
         PPcookiesObj[cookie.name] = cookie.value
     })
-
-    // console.log("PPCookies", PPcookiesObj)
-    // console.log("PPHeaders", PPheaders)
 
     return {PPheaders: JSON.stringify(PPheaders), PPcookies: JSON.stringify(PPcookiesObj)}
   }

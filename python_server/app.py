@@ -44,13 +44,13 @@ async def getIndex(id):
 
     # Prepare SQL queries
     select_vector_table_and_name = """
-        SELECT vector_table, name 
-        FROM companies 
+        SELECT vector_table, name
+        FROM companies
         WHERE id = %s
     """
     select_articles = """
-        SELECT text 
-        FROM company_data_raws 
+        SELECT text
+        FROM company_data_raws
         WHERE company_id = %s AND type = 'site' AND text IS NOT NULL
     """
 
@@ -62,7 +62,7 @@ async def getIndex(id):
 
                 await cur.execute("SELECT 1")
                 print("this works", await cur.fetchone())
-                
+
                 # Fetch vector_table and company name in a single query
                 await cur.execute(select_vector_table_and_name, (id,))
                 tableName, companyName = await cur.fetchone()
@@ -72,7 +72,7 @@ async def getIndex(id):
                     # create one and persist the table name in the companies table
 
                     # create a documents array from raw text
-                    
+
                     await cur.execute(select_articles, (id,))
                     articlesRaw = await cur.fetchall()
                     # print ("articlesRaw", articlesRaw)
@@ -80,7 +80,7 @@ async def getIndex(id):
                     # print ("articles", articles)
 
 
-                    # prepare documents array 
+                    # prepare documents array
                     print(f"Starting document creation for {companyName}.")
                     documents = [Document(text=t) for t in articles]
                     print(f"Finished document creation for {companyName}.")
@@ -114,18 +114,18 @@ async def getIndex(id):
 
                 else:
                     print("vector table already exists")
-                    
+
                 # retrieve and rehydrate index
                     url = make_url(connection_string)
                     print (url)
                     print(f"Retrieving vector store for {companyName}.")
 
                     vector_store = PGVectorStore.from_params(
-                        database=db_name,  
-                        host=url.host,   
-                        password=url.password,  
-                        port=url.port,   
-                        user=url.username,   
+                        database=db_name,
+                        host=url.host,
+                        password=url.password,
+                        port=url.port,
+                        user=url.username,
                         table_name=f"{companyName}_index",
                     )
 
@@ -135,14 +135,14 @@ async def getIndex(id):
                     index = VectorStoreIndex.from_vector_store(vector_store=vector_store, show_progress=True)
                     print(f"Finished rehydrating index for {companyName}.")
                     return index
-    
+
     except Exception as e:
         print(e)
 
     finally:
         await conn.close()
 
-    
+
 
 
 async def generateAnalysis(id):
@@ -152,7 +152,7 @@ async def generateAnalysis(id):
 
     # setup sql cursor
     conn = await psycopg.AsyncConnection.connect(conninfo = os.environ.get('DATABASE_URL', "postgresql://postgres:password@localhost:5432/vector_db"))
-     
+
 
     try:
         async with conn:
@@ -169,13 +169,13 @@ async def generateAnalysis(id):
 
                 # do feature summation and persist response in the company_comparison_points table
                 query_engine = index.as_query_engine()
-                
+
                 print(f"Starting feature summation for {companyName}.")
                 # Note - for now, get features from perplexity
                 # features = query_engine.query(f"What are the main features of {companyName}? What are the main use cases and benefits of each? What problems does each solve? Reply in json eg [{{'feature': feature, 'usecase': usecase, 'benefit': benefit, 'problem': problem}}].")
                 features = perplexQueries.getFeaturesFromPerplexity(companyName)
                 print(f"Finished feature summation for {companyName}.")
-                
+
                 print(f"Starting db insert 1 for {companyName}.")
                 await cur.execute(
                 "INSERT INTO company_comparison_points (company_id, key, value, \"createdAt\", \"updatedAt\") VALUES (%s, %s, %s, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
@@ -189,10 +189,10 @@ async def generateAnalysis(id):
                 # swot = query_engine.query(f"What are the main strengths, weaknesses, opportunities, and threats of {companyName}? Reply in json eg [{{'strength': strength, 'weakness': weakness, 'opportunity': opportunity, 'threat': threat}}].")
                 swot = perplexQueries.getSWOTFromPerplexity(companyName)
                 print(f"Finished SWOT analysis for {companyName}.")
-                
+
                 print(f"Starting db insert 2 for {companyName}.")
                 await cur.execute(
-                    "INSERT INTO company_comparison_points (company_id, key, value, \"createdAt\", \"updatedAt\") VALUES (%s, %s, %s, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)", 
+                    "INSERT INTO company_comparison_points (company_id, key, value, \"createdAt\", \"updatedAt\") VALUES (%s, %s, %s, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
                     (id, "swot", swot)
                 )
                 print(f"Finished db insert 2 for {companyName}.")
@@ -213,7 +213,7 @@ async def generateAnalysis(id):
 async def generateAnalysis2(id, PPheaders, PPcookies):
     # setup sql cursor
     conn = await psycopg.AsyncConnection.connect(conninfo = os.environ.get('DATABASE_URL', "postgresql://postgres:password@localhost:5432/vector_db"))
-     
+
 
     try:
         async with conn:
@@ -235,7 +235,7 @@ async def generateAnalysis2(id, PPheaders, PPcookies):
                 print(f"Starting feature summation for {companyName}.")
                 features = perplexQueries.getFeaturesFromPerplexity(companyName, PPheaders, PPcookies)
                 print(f"Finished feature summation for {companyName}.")
-                
+
                 print(f"Starting db insert 1 for {companyName}.")
                 await cur.execute(
                 "INSERT INTO company_comparison_points (company_id, key, value, \"createdAt\", \"updatedAt\") VALUES (%s, %s, %s, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
@@ -247,10 +247,10 @@ async def generateAnalysis2(id, PPheaders, PPcookies):
                 print (f"Starting SWOT analysis for {companyName}.")
                 swot = perplexQueries.getSWOTFromPerplexity(companyName, PPheaders, PPcookies)
                 print(f"Finished SWOT analysis for {companyName}.")
-                
+
                 print(f"Starting db insert 2 for {companyName}.")
                 await cur.execute(
-                    "INSERT INTO company_comparison_points (company_id, key, value, \"createdAt\", \"updatedAt\") VALUES (%s, %s, %s, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)", 
+                    "INSERT INTO company_comparison_points (company_id, key, value, \"createdAt\", \"updatedAt\") VALUES (%s, %s, %s, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
                     (id, "swot", swot)
                 )
                 print(f"Finished db insert 2 for {companyName}.")
@@ -270,21 +270,21 @@ async def generateAnalysis2(id, PPheaders, PPcookies):
 async def generateComparison(companyIds, PPheaders, PPcookies, comparisonId):
     # setup sql cursor
     conn = await psycopg.AsyncConnection.connect(conninfo=os.environ.get('DATABASE_URL', "postgresql://postgres:password@localhost:5432/vector_db"))
-    
+
     try:
         async with conn:
             async with conn.cursor() as cur:
                 # transform companyIds
                 companyIdString = ",".join([str(id) for id in companyIds])
 
-                # get the featureLists 
+                # get the featureLists
                 await cur.execute(f"select value from company_comparison_points where key = 'feature_list' and company_id in ({companyIdString})")
                 rawResult = await cur.fetchall()
                 result = [x[0] for x in rawResult]
 
                 # use gpt to get a single feature list
                 chat_completion1 = openai.ChatCompletion.create(
-                    model="gpt-4", 
+                    model="gpt-4",
                     messages=[
                         {"role": "user", "content": f"reply with a single list of features from this text. Include all features from all companies. Combine any that are redundant, and remove company names from feature names. Respond in exactly this format with no other text [\"feature1name\", \"feature2name\"]      {json.dumps(result)}"}
                     ]
@@ -292,7 +292,7 @@ async def generateComparison(companyIds, PPheaders, PPcookies, comparisonId):
 
                 # second, remove dupes
                 chat_completion2 = openai.ChatCompletion.create(
-                    model="gpt-4", 
+                    model="gpt-4",
                     messages=[
                         {"role": "user", "content": f"remove or combine features that seem duplicative or similar.  {chat_completion1.choices[0].message.content}"}
                     ]
@@ -302,14 +302,15 @@ async def generateComparison(companyIds, PPheaders, PPcookies, comparisonId):
                 mergedFeatureList = json.loads(chat_completion2.choices[0].message.content)
                 featureListObj = {
                     "features": mergedFeatureList,
-                    "comparisonId": comparisonId
+                    "comparisonId": comparisonId,
+                    "isFeatureList": True
                 }
 
                 # send feature list to JS server
                 response = requests.post("http://127.0.0.1:42069/api/receive-data", json=featureListObj)
                 if response.status_code != 200:
                     print (f"Error sending data to JS server: {response.status_code}")
-                
+
 
                 # Create a list to store all the data for batch insert
                 insert_data = []
@@ -326,7 +327,8 @@ async def generateComparison(companyIds, PPheaders, PPcookies, comparisonId):
                             "companyId": id,
                             "comparisonId": comparisonId,
                             "feature": feature,
-                            "result": result
+                            "result": result,
+                            "features": mergedFeatureList
                         }
 
                         response = requests.post("http://127.0.0.1:42069/api/receive-data", json=data_to_send)
@@ -347,7 +349,7 @@ async def generateComparison(companyIds, PPheaders, PPcookies, comparisonId):
                     insert_data
                 )
                 await conn.commit()  # Commit the transaction
-                
+
     except Exception as e:
         print("Error in generateComparison:", e)
 
@@ -388,8 +390,8 @@ async def compare():
 
     await generateComparison(companyIds, PPheaders, PPcookies, comparisonId)
     # now, can take what we generated and create a comparison.
-   
-    
+
+
 
     # then, respond with success
     return jsonify({"message": "Success!"}), 200
@@ -450,14 +452,14 @@ if __name__ == '__main__':
 
 
 # # ~~~ this section is for creating a vector store and persisting it to postgres ~~~
- 
+
 # # create a documents array from raw text
 # with open ('./zendeskSitePages.json') as f:
 #     articles = json.load(f)
 #     texts = [article['text'] for article in articles]
 
 
-# # prepare documents array 
+# # prepare documents array
 # documents = [Document(text=t) for t in texts]
 
 

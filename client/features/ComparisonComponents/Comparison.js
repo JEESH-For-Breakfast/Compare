@@ -84,7 +84,7 @@ const Comparison = () => {
       </Row>
 
       <Row>
-        <ProgressBar animated now={progressPercentage} />
+        <ProgressBar animated now={parseInt(progressPercentage)} />
       </Row>
 
       <Row className="mx-1">

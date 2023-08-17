@@ -228,7 +228,7 @@ const getG2Reviews = (company) => {
             const page = await browser.newPage();
             // Set page view
             await page.setViewport({ width: 1280, height: 720 });
-        
+
                 //identify the g2 URL for the company
                 let result = await axios.get("https://www.google.com/search?q=" + company.url + " g2")
                 let $ = cheerio.load(result.data)
@@ -237,21 +237,21 @@ const getG2Reviews = (company) => {
                     links.push(element.attribs.href)
                 })
                 links = links.filter(link => link.includes("g2.com"))
-            
+
                 let gtwoUrl = links[0].split('?q=')[1].split('&')[0]
-        
-        
-        
+
+
+
             // Navigate to the website
             await page.goto(gtwoUrl);
-        
+
             // Wait for page to load
             await page.waitForSelector('div#reviews');
-        
+
             const reviews = await page.evaluate(() => {
                 // Get all divs with the class "paper" inside the nested-ajax-loading section
                 const reviewCards = document.querySelectorAll('div#reviews .nested-ajax-loading .paper');
-        
+
                 // Extract the required data from each card
                 const reviewData = [];
                 reviewCards.forEach((card) => {
@@ -261,7 +261,7 @@ const getG2Reviews = (company) => {
                 if (ratingDiv && ratingDiv.className.includes('stars-')) {
                     rating = ratingDiv.className.split('stars-')[1];
                 }
-        
+
                 // Content extraction
                 const reviewBodyDiv = card.querySelector('[itemprop="reviewBody"]');
                 let content = '';
@@ -269,7 +269,7 @@ const getG2Reviews = (company) => {
                     reviewBodyDiv.querySelectorAll('.spht').forEach(span => span.remove());
                     content = reviewBodyDiv.innerText.replace(/\n/g, ' ').trim();
                 }
-        
+
                 // Date extraction
                 let date = '';
                 const dateSpan = card.querySelector('.time-stamp .x-current-review-date');
@@ -285,10 +285,10 @@ const getG2Reviews = (company) => {
                 const id = uuidv4();
                 reviewData.push({ id, rating, content, date });
                 });
-        
+
                 return reviewData;
             });
-        
+
             await CompanyDataRaw.upsert({
                 url: reviews.id,
                 text: {
@@ -298,12 +298,13 @@ const getG2Reviews = (company) => {
                 date: reviews.date,
                 type: 'review',
                 company_id: company.id
-            })  
-        
+            })
+
             // Close the browser
             await browser.close();
         } catch(err){
-            console.log(err)
+            console.log(err);
+            await browser.close();
         }
     });
 }
@@ -311,7 +312,7 @@ const getG2Reviews = (company) => {
 const getArticles = async (company) => {
     try {
         let links = await scrapeCrunchbaseForLinks(company);
-        
+
         await upsertLinksToDatabase(links, company.id);
 
         let newLinks = await getNewLinksFromDatabase();
@@ -333,16 +334,16 @@ const scrapeCrunchbaseForLinks = async (company) => {
             links.push(element.attribs.href);
         });
         links = links.filter(link => link.includes("crunchbase.com"));
-        
+
         let crunchbaseUrl = links[0].split('?q=')[1].split('&')[0] + "/signals_and_news/timeline";
-        
+
         result = await axios.get(crunchbaseUrl, {
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
                 'Referer': 'https://www.google.com'
             }
         });
-        
+
         $ = cheerio.load(result.data);
         links = [];
         $(".activity-url-title").each((index, element) => {
@@ -548,14 +549,14 @@ const getPPheaders = async () => {
     //     console.log("Using puppeteer default browser")
     //     browser = await puppeteer.launch({ headless: "new" }); // you might want to replace "new" with true or false based on your needs.
     // }
-    
+
     // browser = await puppeteer.launch({ headless: "new", args: [
     //     '--proxy-server=http=143.244.182.101:80',
     //   ]});
 
-    
+
     // const page = await browser.newPage();
-    
+
     // // attach to the 'request' event to log all network requests
     // page.on('request', async request => {
     //   let url = request.url()
@@ -564,11 +565,11 @@ const getPPheaders = async () => {
     //     PPcookies = await page.cookies()
     //   }
     // });
-  
+
     // await page.setViewport({
     //     width: 1200,
     //     height: 1900,
-    //   });  
+    //   });
     // await page.goto('https://www.perplexity.ai/');
     // await page.waitForSelector(".ml-md > button");
     // await page.click(".ml-md > button");

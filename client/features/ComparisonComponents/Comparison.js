@@ -1,16 +1,17 @@
 import React, { useContext, useEffect, useState } from "react";
 import TableOfContents from "./TableOfContents";
 import SwotAnalysisTable from "./SwotAnalysisTable";
-import { Container, Row, Col, Offcanvas, Button } from "react-bootstrap";
+import { Container, Row, Col, Offcanvas, Button, ProgressBar } from "react-bootstrap";
 import axios from "axios";
 import ComparisonTable from "./ComparisonTable";
 import { CaretRight } from "react-bootstrap-icons";
 import { useParams } from "react-router-dom";
 
 const Comparison = () => {
-  //This is tentative functions to access DB
+
   const [data, setData] = useState([]);
   const [show, setShow] = useState(false);
+  const [progressPercentage, setProgressPercentage] = useState(0);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
@@ -30,17 +31,23 @@ const Comparison = () => {
   useEffect(() => {
     // Initialize SSE connection
     const evtSource = new EventSource(`/api/comparisons/${comparisonId}/progress`);
-      
+
     evtSource.onmessage = function(event) {
       const sseData = JSON.parse(event.data);
       console.log(sseData);
+      //progress bar logic
+      if(sseData.progressPercentage) {
+        setProgressPercentage(sseData.progressPercentage);
+        getData();
+      }
+
       if (sseData.progress) {
         // Log the progress & refresh data
         console.log(sseData.progress);
         getData();
       }
     };
-  
+
     evtSource.onerror = function(err) {
       console.error("EventSource failed:", err);
       evtSource.close();
@@ -50,7 +57,7 @@ const Comparison = () => {
   }, []);
 
   console.log(data);
-  
+
   return (
     <Container fluid>
       <Offcanvas show={show} onHide={handleClose}>
@@ -76,7 +83,11 @@ const Comparison = () => {
         </Button>
       </Row>
 
-      <Row className="mx-5">
+      <Row>
+        <ProgressBar animated now={progressPercentage} />
+      </Row>
+
+      <Row className="mx-1">
         <ComparisonTable title="Company Profile" companies={data.features} />
         {/*<SwotAnalysisTable
           title="Swot Analysis"

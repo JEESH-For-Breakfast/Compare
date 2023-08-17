@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Table, Button } from "react-bootstrap";
+import { Table, Button, Container } from "react-bootstrap";
 import axios from "axios";
 
 const ComparisonTable = ({ title, companies }) => {
@@ -76,7 +76,7 @@ function toTitleCase(str) {
 
   return (
     <>
-      <div id="company-profile">
+      <Container id="company-profile">
         <h4>{title}</h4>
         <Table striped bordered hover>
           <thead>
@@ -120,7 +120,7 @@ function toTitleCase(str) {
 
 
         </Table>
-      </div>
+      </Container>
     </>
   );
 };

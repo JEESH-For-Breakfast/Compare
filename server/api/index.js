@@ -53,7 +53,7 @@ router.get("/comparisons/:comparisonId/progress", (req, res) => {
   res.setHeader("Connection", "keep-alive");
   res.flushHeaders();
 
-  
+
   // Add this client to the sseClients map
   console.log("Adding SSE client for ID", req.params.comparisonId);
   sseClients.set(String(req.params.comparisonId), res);
@@ -76,10 +76,14 @@ router.post("/receive-data", async (req, res, next) => {
   let comparisonId = data.comparisonId
 
   let featureName = data.feature
-  let result = data.result 
+  let result = data.result
   let companyId = data.companyId
 
   if (features && Array.isArray(features)) {
+    //progress bar logic
+    const progressBarPercentage = {
+
+    };
     // it is the feature list
 
     // update the comparison in the DB
@@ -125,10 +129,11 @@ router.post("/receive-data", async (req, res, next) => {
 
 
     let clientRes = sseClients.get(String(comparisonId));
-   
+
       if (clientRes) {
           console.log(`Sending message: ${JSON.stringify(features)} to ID ${comparisonId}`);
           clientRes.write(`data: {"progress": ${JSON.stringify(JSON.stringify(features))}}\n\n`);
+          clientRes.write(`data: {"progressPercentage": ${progressBarPercentage}}\n\n`)
         } else {
           console.log(`No client found for ID ${comparisonId}`);
       }
@@ -155,7 +160,7 @@ router.post("/receive-data", async (req, res, next) => {
           if (feature.key === featureName) {
             feature.value = result
           }
-        }) 
+        })
       }
     })
 
@@ -170,7 +175,7 @@ router.post("/receive-data", async (req, res, next) => {
 
     // trigger SSE to refresh data
     let clientRes = sseClients.get(String(comparisonId));
-   
+
       if (clientRes) {
           console.log(`Sending message to ID ${comparisonId}`);
           clientRes.write(`data: {"progress": "Received ${featureName} for ${companyId}"}\n\n`);
@@ -247,10 +252,10 @@ router.post("/comparisons", async (req, res, next) => {
     // fn for sending server-side events to client
     const sendSSEUpdate = (id, message) => {
       console.log(`Attempting to send SSE message for ID ${id}`);
-      
+
       const clientRes = sseClients.get(String(id));
 
-      
+
       if (clientRes) {
           console.log(`Sending message: ${JSON.stringify(message)} to ID ${id}`);
           clientRes.write(`data: ${JSON.stringify(message)}\n\n`);

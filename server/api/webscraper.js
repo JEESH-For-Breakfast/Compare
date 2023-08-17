@@ -519,36 +519,34 @@ const getContent = async (company) => {
 const getPPheaders = async () => {
 
     let PPcookies = {
-        '_ga': 'GA1.1.779141588.1691778150',
-        'next-auth.csrf-token': 'cb59506ca36ac465b726a37d35ccfdc962d70688b11b6a75eb0e5773f0a5c810%7Cfd83ee9e92e74fb0a8815cc6886fb668e8318dbc967ef6ea4aa15922f1c2fba9',
-        '__Secure-next-auth.callback-url': 'https%3A%2F%2Fwww.perplexity.ai%2Fapi%2Fauth%2Fsignin-callback%3Fredirect%3Dhttps%253A%252F%252Fwww.perplexity.ai%252F',
-        'cf_clearance': 'RQhtsA8yDWLqzFEa7sieXv8Zi6_UupIXxC4gUXcZEFo-1692212061-0-1-61c17541.9d5f314.36c02aa1-160.0.0',
-        'g_state': '{"i_p":1692309468904,"i_l":2}',
-        'mp_6f4de78898d87a1c8d7b7c5bd8b97049_mixpanel': '%7B%22distinct_id%22%3A%20%22189e5d5ec11e2c-0e6b65b82ad6a8-1a525634-1ce26a-189e5d5ec122689%22%2C%22%24device_id%22%3A%20%22189e5d5ec11e2c-0e6b65b82ad6a8-1a525634-1ce26a-189e5d5ec122689%22%2C%22%24initial_referrer%22%3A%20%22%24direct%22%2C%22%24initial_referring_domain%22%3A%20%22%24direct%22%7D',
-        '__cflb': '02DiuDyvFMmK5p9jVbWbam6CcSLCt41hZndAQUBs1Gs2k',
-        '_ga_SH9PRBQG23': 'GS1.1.1692288467.9.1.1692289466.0.0.0',
-        'AWSALB': 'vD+HpAnX1uXd7TfHwTlyitO0R54g4r3pFJEDTncMOR0E5MF5IBOx70KUuMMfmkRBeDgAg4eRDzcVbTeQWR+sWEOKnP11yqPgnTd4kk2RpJRC3OVAODzMkTZoSQGX',
-        'AWSALBCORS': 'vD+HpAnX1uXd7TfHwTlyitO0R54g4r3pFJEDTncMOR0E5MF5IBOx70KUuMMfmkRBeDgAg4eRDzcVbTeQWR+sWEOKnP11yqPgnTd4kk2RpJRC3OVAODzMkTZoSQGX',
+        'mp_6f4de78898d87a1c8d7b7c5bd8b97049_mixpanel': '%7B%22distinct_id%22%3A%20%2218a04e398fe12e-00206b215e9124-1a525634-1ce26a-18a04e398ff2b8e%22%2C%22%24device_id%22%3A%20%2218a04e398fe12e-00206b215e9124-1a525634-1ce26a-18a04e398ff2b8e%22%2C%22%24initial_referrer%22%3A%20%22%24direct%22%2C%22%24initial_referring_domain%22%3A%20%22%24direct%22%7D',
+        'next-auth.csrf-token': '5787f6b1109144b18ecaf9a071790575663f11c525afc5fbd8ad4e45685ab211%7C1fca3f49ee66ce27239aaf57a8301c69823a62d1c0d56500b51d5afd6533400f',
+        '_ga': 'GA1.1.998485797.1692299139',
+        '__Secure-next-auth.callback-url': 'https%3A%2F%2Fwww.perplexity.ai%2Fapi%2Fauth%2Fsignin-callback%3Fredirect%3Dhttps%253A%252F%252Fwww.perplexity.ai',
+        '__cflb': '02DiuDyvFMmK5p9jVbWbam6CcSLCt41hanRccU91CLEJp',
+        '_ga_SH9PRBQG23': 'GS1.1.1692299139.1.1.1692299140.0.0.0',
+        'AWSALB': '6a3RF3Ounfx7FiMqXiPK2kpoZak9fNs/yXBLiy2pnM1N8Bm9iuFtadYainRu2W3PTle9EX/hkQJGDQNPR40Cnqx1HGOXN7bGneGsxsXzNUVWu3L3DEiRi1HaS1H0',
+        'AWSALBCORS': '6a3RF3Ounfx7FiMqXiPK2kpoZak9fNs/yXBLiy2pnM1N8Bm9iuFtadYainRu2W3PTle9EX/hkQJGDQNPR40Cnqx1HGOXN7bGneGsxsXzNUVWu3L3DEiRi1HaS1H0',
         }
 
-    let PPheaders = {'authority': 'www.perplexity.ai',
-    'authority': 'www.perplexity.ai',
-    'accept': '*/*',
-    'accept-language': 'en-US,en;q=0.9',
-    'baggage': 'sentry-environment=production,sentry-release=rAz1sYiosmVy9CoXonS1_,sentry-public_key=bb45aa7ca2dc43b6a7b6518e7c91e13d,sentry-trace_id=6272ebd3e8134cfdbcab3922382cf133',
-    'content-type': 'application/x-www-form-urlencoded',
-    'cookie': '_ga=GA1.1.779141588.1691778150; next-auth.csrf-token=cb59506ca36ac465b726a37d35ccfdc962d70688b11b6a75eb0e5773f0a5c810%7Cfd83ee9e92e74fb0a8815cc6886fb668e8318dbc967ef6ea4aa15922f1c2fba9; __Secure-next-auth.callback-url=https%3A%2F%2Fwww.perplexity.ai%2Fapi%2Fauth%2Fsignin-callback%3Fredirect%3Dhttps%253A%252F%252Fwww.perplexity.ai%252F; cf_clearance=RQhtsA8yDWLqzFEa7sieXv8Zi6_UupIXxC4gUXcZEFo-1692212061-0-1-61c17541.9d5f314.36c02aa1-160.0.0; g_state={"i_p":1692309468904,"i_l":2}; mp_6f4de78898d87a1c8d7b7c5bd8b97049_mixpanel=%7B%22distinct_id%22%3A%20%22189e5d5ec11e2c-0e6b65b82ad6a8-1a525634-1ce26a-189e5d5ec122689%22%2C%22%24device_id%22%3A%20%22189e5d5ec11e2c-0e6b65b82ad6a8-1a525634-1ce26a-189e5d5ec122689%22%2C%22%24initial_referrer%22%3A%20%22%24direct%22%2C%22%24initial_referring_domain%22%3A%20%22%24direct%22%7D; __cflb=02DiuDyvFMmK5p9jVbWbam6CcSLCt41hZndAQUBs1Gs2k; _ga_SH9PRBQG23=GS1.1.1692288467.9.1.1692289466.0.0.0; AWSALB=vD+HpAnX1uXd7TfHwTlyitO0R54g4r3pFJEDTncMOR0E5MF5IBOx70KUuMMfmkRBeDgAg4eRDzcVbTeQWR+sWEOKnP11yqPgnTd4kk2RpJRC3OVAODzMkTZoSQGX; AWSALBCORS=vD+HpAnX1uXd7TfHwTlyitO0R54g4r3pFJEDTncMOR0E5MF5IBOx70KUuMMfmkRBeDgAg4eRDzcVbTeQWR+sWEOKnP11yqPgnTd4kk2RpJRC3OVAODzMkTZoSQGX',
-    'origin': 'https://www.perplexity.ai',
-    'referer': 'https://www.perplexity.ai/search/c70d4d26-6ff6-4ad9-ac76-237bd4eb0417?s=u',
-    'sec-ch-ua': '"Not/A)Brand";v="99", "Google Chrome";v="115", "Chromium";v="115"',
-    'sec-ch-ua-mobile': '?0',
-    'sec-ch-ua-platform': '"macOS"',
-    'sec-fetch-dest': 'empty',
-    'sec-fetch-mode': 'cors',
-    'sec-fetch-site': 'same-origin',
-    'sentry-trace': '6272ebd3e8134cfdbcab3922382cf133-a235ccd46430881f-0',
-    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
-}
+    let PPheaders = {
+        'authority': 'www.perplexity.ai',
+        'accept': '*/*',
+        'accept-language': 'en-US,en;q=0.9',
+        'baggage': 'sentry-environment=production,sentry-release=rAz1sYiosmVy9CoXonS1_,sentry-public_key=bb45aa7ca2dc43b6a7b6518e7c91e13d,sentry-trace_id=dc29eace881241928dbe34fa6ad30314',
+        'content-type': 'application/x-www-form-urlencoded',
+        'cookie': 'mp_6f4de78898d87a1c8d7b7c5bd8b97049_mixpanel=%7B%22distinct_id%22%3A%20%2218a04e398fe12e-00206b215e9124-1a525634-1ce26a-18a04e398ff2b8e%22%2C%22%24device_id%22%3A%20%2218a04e398fe12e-00206b215e9124-1a525634-1ce26a-18a04e398ff2b8e%22%2C%22%24initial_referrer%22%3A%20%22%24direct%22%2C%22%24initial_referring_domain%22%3A%20%22%24direct%22%7D; next-auth.csrf-token=5787f6b1109144b18ecaf9a071790575663f11c525afc5fbd8ad4e45685ab211%7C1fca3f49ee66ce27239aaf57a8301c69823a62d1c0d56500b51d5afd6533400f; _ga=GA1.1.998485797.1692299139; __Secure-next-auth.callback-url=https%3A%2F%2Fwww.perplexity.ai%2Fapi%2Fauth%2Fsignin-callback%3Fredirect%3Dhttps%253A%252F%252Fwww.perplexity.ai; __cflb=02DiuDyvFMmK5p9jVbWbam6CcSLCt41hanRccU91CLEJp; _ga_SH9PRBQG23=GS1.1.1692299139.1.1.1692299140.0.0.0; AWSALB=6a3RF3Ounfx7FiMqXiPK2kpoZak9fNs/yXBLiy2pnM1N8Bm9iuFtadYainRu2W3PTle9EX/hkQJGDQNPR40Cnqx1HGOXN7bGneGsxsXzNUVWu3L3DEiRi1HaS1H0; AWSALBCORS=6a3RF3Ounfx7FiMqXiPK2kpoZak9fNs/yXBLiy2pnM1N8Bm9iuFtadYainRu2W3PTle9EX/hkQJGDQNPR40Cnqx1HGOXN7bGneGsxsXzNUVWu3L3DEiRi1HaS1H0',
+        'origin': 'https://www.perplexity.ai',
+        'referer': 'https://www.perplexity.ai/search/dd4106f0-ff48-4d40-961e-7a0e2f01aa01?s=u',
+        'sec-ch-ua': '"Not/A)Brand";v="99", "Google Chrome";v="115", "Chromium";v="115"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"macOS"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-origin',
+        'sentry-trace': 'dc29eace881241928dbe34fa6ad30314-8c47104846441fd9-0',
+        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+        }
 
     let browser
 
